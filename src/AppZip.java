@@ -19,7 +19,6 @@ public class AppZip
         File leadFile = new File("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\files.txt");
         File remainingListings = new File("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\BackListImages.txt");
 
-
         if(remainingListings.exists())
         {
             boolean goodChoice = true;
@@ -51,8 +50,10 @@ public class AppZip
             imagesPathSet = getImagePath(new File(StartFile));
         }
 
-        int numberFilesPerZipFile = 2;
+
         int totalFilesFound = imagesPathSet.size();
+        int numberFilesPerZipFile = 20;
+
 
         System.out.println(totalFilesFound + " Files found.");
         //scanner: number of files per zip file.
@@ -88,7 +89,8 @@ public class AppZip
         return images;
     }
 
-    private static void zipFiles(Set<String> images) throws IOException {
+    private static void zipFiles(Set<String> images) throws IOException
+    {
         FileOutputStream fos = null;
 
         try
@@ -109,28 +111,26 @@ public class AppZip
             try
             {
                 fileInputStream = new FileInputStream(fileToZip);
+                ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+                zipOutputStream.putNextEntry(zipEntry);
+
+                byte[] bytes = new byte[1024];
+                int length;
+                while ((length = fileInputStream.read(bytes)) >= 0 )
+                {
+                    zipOutputStream.write(bytes, 0, length);
+                }
+                fileInputStream.close();
             }
             catch (FileNotFoundException e)
             {
+                System.out.println(srcFile + " not found.  Appending to file.");
                 filesNotFound(srcFile);
             }
-
-            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
-            zipOutputStream.putNextEntry(zipEntry);
-
-            byte[] bytes = new byte[1024];
-            int length;
-            while ((length = fileInputStream.read(bytes)) >= 0 )
-            {
-                zipOutputStream.write(bytes, 0, length);
-            }
-            fileInputStream.close();
         }
         zipOutputStream.close();
         fos.close();
     }
-
-
 
     private static void updateRemainingFilePaths(Set<String> imagesPathSet, Set<String> lastZippedImages)
     {
@@ -196,6 +196,44 @@ public class AppZip
 
     private static void filesNotFound(String srcFile)
     {
-        //todo: add a file with files not found - append to file.
+
+        final String FILE_NAME = "C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\skuNotFound.txt";
+
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        File file = new File(FILE_NAME);
+
+        try
+        {
+            if (!file.exists())
+            {
+                file.createNewFile();
+            }
+
+            fw = new FileWriter(file.getAbsoluteFile(), true);
+            bw = new BufferedWriter(fw);
+
+            bw.write(srcFile + "\n");
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                if (bw != null)
+                    bw.close();
+                if (fw != null)
+                    fw.close();
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+
     }
 }
