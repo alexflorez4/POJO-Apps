@@ -10,16 +10,15 @@ public class AppZip
     private static Set<String> imagesToZipSet = new HashSet<>();
     private static Set<String> imagesZippedSet = new HashSet<>();
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws Exception
     {
         //exec. java AppZip
         Scanner scanner = new Scanner(System.in);
-        Set<String> imagesPathSet = new HashSet<>();
+        Set<String> imagesPath_Set = new HashSet<>();
 
-        File leadFile = new File("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\files.txt");
-        File remainingListings = new File("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\BackListImages.txt");
-
-        if(remainingListings.exists())
+        //File remainingImagesList_File = new File("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\BackListImages.txt");
+        File remainingImagesList_File = new File("BackListImages.txt");
+        if(remainingImagesList_File.exists())
         {
             boolean goodChoice = true;
             do
@@ -30,12 +29,11 @@ public class AppZip
                 switch (useExistingFile)
                 {
                     case "y":
-                        imagesPathSet = getImagePath(remainingListings);
-                        System.out.println("Using existing");
+                        imagesPath_Set = getImagePath(remainingImagesList_File);
                         break;
                     case "n":
-                        imagesPathSet = getImagePath(leadFile);
-                        System.out.println("Starting over");
+                        System.out.println("Enter File path (i.e. C:\\files.txt): ");
+                        imagesPath_Set = getImagePath(new File(scanner.nextLine()));
                         break;
                     default:
                         System.out.println("Invalid choice");
@@ -46,40 +44,44 @@ public class AppZip
         else
         {
             System.out.println("Enter File path (i.e. C:\\files.txt): ");
-            String StartFile = scanner.nextLine();
-            imagesPathSet = getImagePath(new File(StartFile));
+            imagesPath_Set = getImagePath(new File(scanner.nextLine()));
         }
 
+        int totalFilesFound = imagesPath_Set.size();
+        System.out.println("Enter number of files to zip (max:" + totalFilesFound +") :");
+        int numberFilesPerZipFile = scanner.nextInt();
+        numberFilesPerZipFile = numberFilesPerZipFile > totalFilesFound ? totalFilesFound : numberFilesPerZipFile;
 
-        int totalFilesFound = imagesPathSet.size();
-        int numberFilesPerZipFile = 20;
-
-
-        System.out.println(totalFilesFound + " Files found.");
-        //scanner: number of files per zip file.
-
-        for(String imagePath : imagesPathSet)
+        for(String imagePath : imagesPath_Set)
         {
-                if (imagesToZipSet.size() < numberFilesPerZipFile)
+            if (imagesToZipSet.size() < numberFilesPerZipFile)
+            {
+                imagesToZipSet.add(imagePath);
+                if(imagesToZipSet.size() == numberFilesPerZipFile)
                 {
-                    imagesToZipSet.add(imagePath);
-                    if(imagesToZipSet.size() == numberFilesPerZipFile)
-                    {
-                        zipFiles(imagesToZipSet);
-                        updateRemainingFilePaths(imagesPathSet, imagesToZipSet);
-                    }
+                    zipFiles(imagesToZipSet);
+                    updateRemainingFilePaths(imagesPath_Set, imagesToZipSet);
                 }
+            }
         }
         if(imagesToZipSet.size()>0)
         {
             zipFiles(imagesToZipSet);
-            updateRemainingFilePaths(imagesPathSet, imagesToZipSet);
+            updateRemainingFilePaths(imagesPath_Set, imagesToZipSet);
         }
     }
 
-    private static Set<String> getImagePath(File imageLocation) throws FileNotFoundException
-    {
-        Scanner sc = new Scanner(imageLocation);
+    private static Set<String> getImagePath(File imageLocation) throws Exception {
+        Scanner sc = null;
+        try
+        {
+            sc = new Scanner(imageLocation);
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new Exception("Error: File " + imageLocation + " was not found.");
+        }
+
         Set<String> images = new HashSet<>();
 
         while (sc.hasNext())
@@ -95,7 +97,8 @@ public class AppZip
 
         try
         {
-           fos  = new FileOutputStream("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\imageMigration.zip");
+           //fos  = new FileOutputStream("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\imageMigration.zip");
+            fos  = new FileOutputStream("imageMigration.zip");
         }
         catch (FileNotFoundException e)
         {
@@ -139,7 +142,8 @@ public class AppZip
 
         try
         {
-            fw = new FileWriter("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\BackListImages.txt");
+            //fw = new FileWriter("C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\BackListImages.txt");
+            fw = new FileWriter("BackListImages.txt");
             bw = new BufferedWriter(fw);
 
             for(String nextImage : imagesPathSet)
@@ -196,9 +200,8 @@ public class AppZip
 
     private static void filesNotFound(String srcFile)
     {
-
-        final String FILE_NAME = "C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\skuNotFound.txt";
-
+        //final String FILE_NAME = "C:\\Users\\alexander-florez\\Documents\\TrainProjects\\VirtualPairProgrammers\\out\\production\\ZIPFiles\\skuNotFound.txt";
+        final String FILE_NAME = "skuNotFound.txt";
         BufferedWriter bw = null;
         FileWriter fw = null;
 
